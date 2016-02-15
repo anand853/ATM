@@ -1,7 +1,5 @@
 package com.atm.servletCapture;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.DriverManager;
@@ -9,38 +7,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
-
-import com.appstechs.beans.AccountDetails;
-import com.mysql.fabric.Response;
 import com.mysql.jdbc.Connection;
 
-import jdk.nashorn.internal.ir.RuntimeNode.Request;
-
 /**
- * Servlet implementation class CaptureFormData
+ * Servlet implementation class CaptureWithdrawalFormData
  */
-@WebServlet("/CaptureFormData")
-public class CaptureFormData extends HttpServlet {
+@WebServlet("/CaptureWithdrawalFormData")
+public class CaptureWithdrawalFormData extends HttpServlet {
+	private static final long serialVersionUID = 1L;
 
 	PrintWriter out;
 
@@ -51,19 +32,28 @@ public class CaptureFormData extends HttpServlet {
 	static final String USER = "root";
 	static final String PASS = "root";
 
+	private static String accountDeatilsIDValue;
+
+	private static String withdrawalValue;
+
+	private static String amountValue;
+
 	static Connection conn = null;
 	static Statement stmt = null;
 	static Statement stmt1 = null;
 
-	static Integer lAccount = 0;
-	static Integer lPin = 0;
-	static Integer lAmount = 0;
-
-	private static final long serialVersionUID = 1L;
+	Integer accountDetailsInt;
+	Integer withdrawalInt;
+	Integer amountInt;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
+	public CaptureWithdrawalFormData() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
 	static {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -76,74 +66,81 @@ public class CaptureFormData extends HttpServlet {
 
 	}
 
-	public CaptureFormData() {
-		super();
-
-	}
-
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		doPost(request, response);
-
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
-		// response.setContentType("text/html");
 		out = response.getWriter();
+
 		try {
-			insertIntoAccountDetails(request, response);
+			insertIntoDeposit(request, response);
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		out = response.getWriter();
+
 	}
 
-	private void insertIntoAccountDetails(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, SQLException {
+	private void insertIntoDeposit(HttpServletRequest request, HttpServletResponse response) throws SQLException {
 
-		String localAccountNumner = request.getParameter("accountNumber");
-		lAccount = Integer.parseInt(localAccountNumner);
-		String localPin = request.getParameter("pin");
-		lPin = Integer.parseInt(localPin);
-		String localAmount = request.getParameter("amount");
-		lAmount = Integer.parseInt(localAmount);
+		withdrawalValue = request.getParameter("withdrawalID");
+		withdrawalInt = Integer.parseInt(withdrawalValue);
+
+		amountValue = request.getParameter("amount");
+		amountInt = Integer.parseInt(amountValue);
+
+		accountDeatilsIDValue = request.getParameter("accountNumber");
+		accountDetailsInt = Integer.parseInt(accountDeatilsIDValue);
+
+		out.println("<h1>The account is value is" + accountDetailsInt);
+		out.println("The withdrawalID is value is" + withdrawalInt);
+		out.println("The amout is value is" + amountInt + "</h1>");
+
+		System.out.println("The account is value is" + accountDetailsInt + "");
+		out.print("<br>");
+		System.out.println("The withdrawalID is value is" + withdrawalInt + "");
+		out.print("<br>");
+		System.out.println("The amout is value is" + amountInt + "");
 
 		boolean flag = saveTheRow();
 		System.out.println(flag);
+
 		if (flag) {
 			System.out.println("Record is available");
 			out.println("<h1>Record is available</h1>");
-			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+			out.println("<a href='http://localhost:8080/ATM/index2.html/'>Back to Deposit</a>");
 
 		} else {
 			System.out.println("Record not available");
 			out.println("<h1>Record not available</h1>");
 
-			String insertTableSQL = "INSERT INTO ACCOUNT_DETAILS VALUES (?,?,?)";
+			String insertTableSQL = "INSERT INTO WITHDRAWAL VALUES (?,?,?)";
 			PreparedStatement preparedStatement = conn.prepareStatement(insertTableSQL);
-			preparedStatement.setInt(1, lAccount);
-			preparedStatement.setInt(2, lPin);
-			preparedStatement.setInt(3, lAmount);
+			preparedStatement.setInt(1, withdrawalInt);
+			preparedStatement.setInt(2, amountInt);
+			preparedStatement.setInt(3, accountDetailsInt);
 
 			preparedStatement.executeUpdate();
 			System.out.println(" ------ so new row saved in the database-----------");
 			out.println("<h1> ------ so new row saved in the database-----------</h1>");
-			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+			out.println("<a href='http://localhost:8080/ATM/index2.html/'>Back to Deposit</a>");
 		}
 
 	}
 
-	private static boolean saveTheRow() throws SQLException {
+	private boolean saveTheRow() throws SQLException {
 
-		String sql = "SELECT * FROM ACCOUNT_DETAILS WHERE ACCOUNT_DETAILS_ID=?";
+		String sql = "SELECT * FROM WITHDRAWAL WHERE WITHDRAWAL_ID=?";
 
 		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setInt(1, lAccount);
+		ps.setInt(1, withdrawalInt);
 		ResultSet rs = ps.executeQuery();
 		return rs.next();
 
 	}
-
 }

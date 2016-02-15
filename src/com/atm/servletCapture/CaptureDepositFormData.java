@@ -1,7 +1,5 @@
 package com.atm.servletCapture;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.DriverManager;
@@ -9,38 +7,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.AnnotationConfiguration;
-import org.hibernate.cfg.Configuration;
-
-import com.appstechs.beans.AccountDetails;
-import com.mysql.fabric.Response;
 import com.mysql.jdbc.Connection;
 
-import jdk.nashorn.internal.ir.RuntimeNode.Request;
-
 /**
- * Servlet implementation class CaptureFormData
+ * Servlet implementation class CaptureDepositFormData
  */
-@WebServlet("/CaptureFormData")
-public class CaptureFormData extends HttpServlet {
+@WebServlet("/CaptureDepositFormData")
+public class CaptureDepositFormData extends HttpServlet {
+	private static final long serialVersionUID = 1L;
 
 	PrintWriter out;
 
@@ -51,19 +32,24 @@ public class CaptureFormData extends HttpServlet {
 	static final String USER = "root";
 	static final String PASS = "root";
 
+	private static String accountDeatilsIDValue;
+
+	private static String depositValue;
+
+	private static String amountValue;
+
 	static Connection conn = null;
 	static Statement stmt = null;
 	static Statement stmt1 = null;
 
-	static Integer lAccount = 0;
-	static Integer lPin = 0;
-	static Integer lAmount = 0;
+	Integer accountDetailsInt;
+	Integer depositInt;
+	Integer amountInt;
 
-	private static final long serialVersionUID = 1L;
+	public CaptureDepositFormData() {
+		super();
+	}
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
 	static {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
@@ -76,74 +62,81 @@ public class CaptureFormData extends HttpServlet {
 
 	}
 
-	public CaptureFormData() {
-		super();
-
-	}
-
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		doPost(request, response);
-
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
-		// response.setContentType("text/html");
 		out = response.getWriter();
+
 		try {
-			insertIntoAccountDetails(request, response);
+			insertIntoDeposit(request, response);
 		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		out = response.getWriter();
+
 	}
 
-	private void insertIntoAccountDetails(HttpServletRequest request, HttpServletResponse response)
-			throws IOException, SQLException {
+	private void insertIntoDeposit(HttpServletRequest request, HttpServletResponse response) throws SQLException {
 
-		String localAccountNumner = request.getParameter("accountNumber");
-		lAccount = Integer.parseInt(localAccountNumner);
-		String localPin = request.getParameter("pin");
-		lPin = Integer.parseInt(localPin);
-		String localAmount = request.getParameter("amount");
-		lAmount = Integer.parseInt(localAmount);
+		depositValue = request.getParameter("depositID");
+		depositInt = Integer.parseInt(depositValue);
+
+		amountValue = request.getParameter("amount");
+		amountInt = Integer.parseInt(amountValue);
+
+		accountDeatilsIDValue = request.getParameter("accountDetailsID");
+		accountDetailsInt = Integer.parseInt(accountDeatilsIDValue);
+
+		out.println("<h1>The account is value is" + accountDetailsInt);
+		out.println("The depositID is value is" + depositInt);
+		out.println("The amout is value is" + amountInt + "</h1>");
+
+		System.out.println("The account is value is" + accountDetailsInt + "");
+		out.print("<br>");
+		System.out.println("The depositID is value is" + depositInt + "");
+		out.print("<br>");
+		System.out.println("The amout is value is" + amountInt + "");
 
 		boolean flag = saveTheRow();
 		System.out.println(flag);
+
 		if (flag) {
 			System.out.println("Record is available");
 			out.println("<h1>Record is available</h1>");
-			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+			out.println("<a href='http://localhost:8080/ATM/index2.html/'>Back to Deposit</a>");
 
 		} else {
 			System.out.println("Record not available");
 			out.println("<h1>Record not available</h1>");
 
-			String insertTableSQL = "INSERT INTO ACCOUNT_DETAILS VALUES (?,?,?)";
+			String insertTableSQL = "INSERT INTO DEPOSIT VALUES (?,?,?)";
 			PreparedStatement preparedStatement = conn.prepareStatement(insertTableSQL);
-			preparedStatement.setInt(1, lAccount);
-			preparedStatement.setInt(2, lPin);
-			preparedStatement.setInt(3, lAmount);
+			preparedStatement.setInt(1, depositInt);
+			preparedStatement.setInt(2, amountInt);
+			preparedStatement.setInt(3, accountDetailsInt);
 
 			preparedStatement.executeUpdate();
 			System.out.println(" ------ so new row saved in the database-----------");
 			out.println("<h1> ------ so new row saved in the database-----------</h1>");
-			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+			out.println("<a href='http://localhost:8080/ATM/index2.html/'>Back to Deposit</a>");
 		}
 
 	}
 
-	private static boolean saveTheRow() throws SQLException {
+	private boolean saveTheRow() throws SQLException {
 
-		String sql = "SELECT * FROM ACCOUNT_DETAILS WHERE ACCOUNT_DETAILS_ID=?";
+		String sql = "SELECT * FROM DEPOSIT WHERE DEPOSIT_ID=?";
 
 		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setInt(1, lAccount);
+		ps.setInt(1, depositInt);
 		ResultSet rs = ps.executeQuery();
 		return rs.next();
 
 	}
-
 }

@@ -2,32 +2,31 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>ATM Project</title>
+<title>Insert title here</title>
 </head>
 <body>
 	<div class="form">
 		<div class="tab-content">
 			<div id="signup">
-				<h1>ATM</h1>
+				<h1>ATM - Withdrawal</h1>
 
-				<form action="/ATM/CaptureFormData" method="post">
+				<form action="/ATM/CaptureWithdrawalFormData" method="post">
 
 					<div class="top-row">
 						<label for="accountNumber">Account Number: <input
 							type="text" size="10" maxlength="15" name="accountNumber" /></label><br>
-						<br> <label for="pin">Pin : <input type="text"
-							size="10" maxlength="15" name="pin" id="pin" /></label><br> <br>
-						<label for="amount">Amount: <input type="amount" size="10"
-							maxlength="15" name="amount" /></label>
-						<button type="submit" />
+						<br> <label for="withdrawalID">Deposit ID: <input
+							type="text" size="10" maxlength="15" name="withdrawalID"
+							id="withdrawalID" /></label><br> <br> <label for="amount">Amount:
+							<input type="amount" size="10" maxlength="15" name="amount" />
+						</label>
+						<button type="submit"/>
 						Get Started
 						</button>
 					</div>
 				</form>
 				<br> <br> <br> <a
-					href='http://localhost:8080/ATM/index2.html'>move to Deposit
-					Page</a> <br> <br> <br> <a
-					href='http://localhost:8080/ATM/index3.html'>move to Withdrawal
+					href='http://localhost:8080/ATM/index2.html'>move to Amount
 					Page</a>
 			</div>
 
