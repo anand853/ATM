@@ -29,6 +29,7 @@ import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.Configuration;
 
 import com.appstechs.beans.AccountDetails;
+import com.mysql.fabric.Response;
 import com.mysql.jdbc.Connection;
 
 import jdk.nashorn.internal.ir.RuntimeNode.Request;
@@ -40,17 +41,6 @@ import jdk.nashorn.internal.ir.RuntimeNode.Request;
 public class CaptureFormData extends HttpServlet {
 
 	PrintWriter out;
-	private static String accountNumber;
-	private static String pin;
-	private static String amount;
-
-	private static String accountCaptured;
-	private static String pinCaptured;
-	private static String amountCaptured;
-
-	private static int accountN;
-	private static int pinN;
-	private static int amountN;
 
 	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
 	static final String DB_URL = "jdbc:mysql://localhost/USA";
@@ -58,16 +48,14 @@ public class CaptureFormData extends HttpServlet {
 	// Database credentials
 	static final String USER = "root";
 	static final String PASS = "root";
-	Hashtable list = new Hashtable();
 
 	static Connection conn = null;
 	static Statement stmt = null;
 	static Statement stmt1 = null;
 
-	private static Session session;
-	private static Configuration cfg;
-	private static SessionFactory factory;
-	private static Transaction t;
+	static Integer lAccount = 0;
+	static Integer lPin = 0;
+	static Integer lAmount = 0;
 
 	private static final long serialVersionUID = 1L;
 
@@ -88,29 +76,21 @@ public class CaptureFormData extends HttpServlet {
 
 	public CaptureFormData() {
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		doPost(request, response);
 
 	}
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-	 *      response)
-	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		response.getWriter();
 		try {
 			insertIntoAccountDetails(request, response);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -119,22 +99,47 @@ public class CaptureFormData extends HttpServlet {
 	private void insertIntoAccountDetails(HttpServletRequest request, HttpServletResponse response)
 			throws IOException, SQLException {
 
-		response.getWriter();
 		String localAccountNumner = request.getParameter("accountNumber");
-		Integer lAccount = Integer.parseInt(localAccountNumner);
+		lAccount = Integer.parseInt(localAccountNumner);
 		String localPin = request.getParameter("pin");
-		Integer lPin = Integer.parseInt(localPin);
+		lPin = Integer.parseInt(localPin);
 		String localAmount = request.getParameter("amount");
-		Integer lAmount = Integer.parseInt(localAmount);
+		lAmount = Integer.parseInt(localAmount);
 
-		String insertTableSQL = "INSERT INTO ACCOUNT_DETAILS VALUES (?,?,?)";
-		PreparedStatement preparedStatement = conn.prepareStatement(insertTableSQL);
-		preparedStatement.setInt(1, lAccount);
-		preparedStatement.setInt(2, lPin);
-		preparedStatement.setInt(3, lAmount);
+		boolean flag = saveTheRow();
+		System.out.println(flag);
+		if (flag) {
+			System.out.println("Record is available");
+			out.println("Record is available");
+			// out.println("<a href='http://localhost:8080/ATM/'>Back to ATM
+			// W3Schools</a>");
 
-		preparedStatement.executeUpdate();
-		System.out.println(" ------ row saved-----------");
+		} else {
+			System.out.println("Record not available");
+			out.println("Record not available");
+
+			String insertTableSQL = "INSERT INTO ACCOUNT_DETAILS VALUES (?,?,?)";
+			PreparedStatement preparedStatement = conn.prepareStatement(insertTableSQL);
+			preparedStatement.setInt(1, lAccount);
+			preparedStatement.setInt(2, lPin);
+			preparedStatement.setInt(3, lAmount);
+
+			preparedStatement.executeUpdate();
+			System.out.println(" ------ so new row saved in the database-----------");
+			out.println(" ------ so new row saved in the database-----------");
+			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM W3Schools</a>");
+		}
+
+	}
+
+	private static boolean saveTheRow() throws SQLException {
+
+		String sql = "SELECT * FROM ACCOUNT_DETAILS WHERE ACCOUNT_DETAILS_ID=?";
+
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, lAccount);
+		ResultSet rs = ps.executeQuery();
+		return rs.next();
 
 	}
 

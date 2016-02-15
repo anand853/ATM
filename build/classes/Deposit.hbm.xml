@@ -3,16 +3,16 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Feb 9, 2016 11:24:19 PM by Hibernate Tools 3.4.0.CR1 -->
 <hibernate-mapping>
-    <class name="AccountDetails" table="account_details" catalog="USA">
-        <id name="accountDetailsId" type="java.lang.Integer">
-            <column name="ACCOUNT_DETAILS_ID" />
+    <class name="Deposit" table="deposit" catalog="USA">
+        <id name="depositId" type="java.lang.Integer">
+            <column name="DEPOSIT_ID" />
             <generator class="identity" />
         </id>
-        <property name="accountNumber" type="int">
-            <column name="ACCOUNT_NUMBER" not-null="true" />
+        <property name="amount" type="int">
+            <column name="AMOUNT" not-null="true" />
         </property>
-        <property name="pin" type="int">
-            <column name="PIN" not-null="true" />
+        <property name="accountDetailsId" type="java.lang.Integer">
+            <column name="ACCOUNT_DETAILS_ID" />
         </property>
     </class>
 </hibernate-mapping>

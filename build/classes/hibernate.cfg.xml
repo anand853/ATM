@@ -6,14 +6,16 @@
 	<session-factory>
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
 		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
-
-		<!-- Assume test is the database name -->
 		<property name="hibernate.connection.url">jdbc:mysql://localhost/USA</property>
 		<property name="hibernate.connection.username">root</property>
 		<property name="hibernate.connection.password">root</property>
 
 		<!-- List of XML mapping files -->
-		<mapping resource="AccountDetails.hbm.xml" />
+
+		<mapping class="com.appstechs.beans.AccountDetails" />
+		<mapping class="com.appstechs.beans.Deposit" />
+		<mapping class="com.appstechs.beans.Employee" />
+		<mapping class="com.appstechs.beans.Withdrawal" />
 
 	</session-factory>
 </hibernate-configuration>
