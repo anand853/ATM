@@ -2,9 +2,7 @@ package com.atm.servletCapture;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -14,29 +12,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.mysql.jdbc.Connection;
+import com.servlet.utils.Commons;
+import com.servlet.utils.DataWrappers;
+import com.servlet.utils.DriverLoader;
 
 /**
  * Servlet implementation class CaptureDepositFormData
  */
-@WebServlet("/CaptureDepositFormData")
+@WebServlet("/CaptureDeposit")
 public class CaptureDepositFormData extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	static Logger logger = null;
+
 	PrintWriter out;
-
-	static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-	static final String DB_URL = "jdbc:mysql://localhost/USA";
-
-	// Database credentials
-	static final String USER = "root";
-	static final String PASS = "root";
-
-	private static String accountDeatilsIDValue;
-
-	private static String depositValue;
-
-	private static String amountValue;
 
 	static Connection conn = null;
 	static Statement stmt = null;
@@ -50,26 +42,18 @@ public class CaptureDepositFormData extends HttpServlet {
 		super();
 	}
 
-	static {
-		try {
-			Class.forName("com.mysql.jdbc.Driver");
-			conn = (Connection) DriverManager.getConnection(DB_URL, USER, PASS);
-			stmt = conn.createStatement();
-			System.out.println("conection established...");
-		} catch (ClassNotFoundException | SQLException e) {
-			e.printStackTrace();
-		}
-
-	}
-
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
 		doPost(request, response);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
 		out = response.getWriter();
+		logger = DriverLoader.getLogger();
+		conn = DriverLoader.loadDrivers();
 
 		try {
 			insertIntoDeposit(request, response);
@@ -83,36 +67,31 @@ public class CaptureDepositFormData extends HttpServlet {
 	}
 
 	private void insertIntoDeposit(HttpServletRequest request, HttpServletResponse response) throws SQLException {
-
-		depositValue = request.getParameter("depositID");
-		depositInt = Integer.parseInt(depositValue);
-
-		amountValue = request.getParameter("amount");
-		amountInt = Integer.parseInt(amountValue);
-
-		accountDeatilsIDValue = request.getParameter("accountDetailsID");
-		accountDetailsInt = Integer.parseInt(accountDeatilsIDValue);
+		logger.info("----CaptureDepositFormData::insertIntoDeposit()-----");
+		accountDetailsInt = DataWrappers.getInts(request, response, "accountDetailsID");
+		depositInt = DataWrappers.getInts(request, response, "depositID");
+		amountInt = DataWrappers.getInts(request, response, "amount");
 
 		out.println("<h1>The account is value is" + accountDetailsInt);
 		out.println("The depositID is value is" + depositInt);
 		out.println("The amout is value is" + amountInt + "</h1>");
 
-		System.out.println("The account is value is" + accountDetailsInt + "");
+		logger.info("The account is value is" + accountDetailsInt + "");
 		out.print("<br>");
-		System.out.println("The depositID is value is" + depositInt + "");
+		logger.info("The depositID is value is" + depositInt + "");
 		out.print("<br>");
-		System.out.println("The amout is value is" + amountInt + "");
+		logger.info("The amout is value is" + amountInt + "");
 
-		boolean flag = saveTheRow();
-		System.out.println(flag);
+		boolean flag = DataWrappers.isPersist(conn, Commons.DEPOSIT_SELECT, depositInt);
+		logger.info(flag);
 
 		if (flag) {
-			System.out.println("Record is available");
+			logger.info("Record is available");
 			out.println("<h1>Record is available</h1>");
 			out.println("<a href='http://localhost:8080/ATM/index2.html/'>Back to Deposit</a>");
 
 		} else {
-			System.out.println("Record not available");
+			logger.info("Record not available");
 			out.println("<h1>Record not available</h1>");
 
 			String insertTableSQL = "INSERT INTO DEPOSIT VALUES (?,?,?)";
@@ -122,21 +101,11 @@ public class CaptureDepositFormData extends HttpServlet {
 			preparedStatement.setInt(3, accountDetailsInt);
 
 			preparedStatement.executeUpdate();
-			System.out.println(" ------ so new row saved in the database-----------");
+			logger.info(" ------ so new row saved in the database-----------");
 			out.println("<h1> ------ so new row saved in the database-----------</h1>");
-			out.println("<a href='http://localhost:8080/ATM/index2.html/'>Back to Deposit</a>");
+			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
 		}
 
 	}
 
-	private boolean saveTheRow() throws SQLException {
-
-		String sql = "SELECT * FROM DEPOSIT WHERE DEPOSIT_ID=?";
-
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setInt(1, depositInt);
-		ResultSet rs = ps.executeQuery();
-		return rs.next();
-
-	}
 }
