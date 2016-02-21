@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -33,9 +35,7 @@ public class CaptureWithdrawalFormData extends HttpServlet {
 	PrintWriter out;
 
 	private static String accountDeatilsIDValue;
-
 	private static String withdrawalValue;
-
 	private static String amountValue;
 
 	static Connection conn = null;
@@ -45,6 +45,8 @@ public class CaptureWithdrawalFormData extends HttpServlet {
 	Integer accountDetailsInt;
 	Integer withdrawalInt;
 	Integer amountInt;
+
+	List list = new Vector();
 
 	public CaptureWithdrawalFormData() {
 		super();
@@ -76,9 +78,13 @@ public class CaptureWithdrawalFormData extends HttpServlet {
 	private void insertIntoDeposit(HttpServletRequest request, HttpServletResponse response) throws SQLException {
 		logger.info("----CaptureWithdrawalFormData::CaptureWithdrawalFormData()-----");
 
-		withdrawalInt = DataWrappers.getInts(request, response, "withdrawalID");
 		accountDetailsInt = DataWrappers.getInts(request, response, "accountNumber");
+		withdrawalInt = DataWrappers.getInts(request, response, "withdrawalID");
 		amountInt = DataWrappers.getInts(request, response, "amount");
+
+		list.add(accountDetailsInt);
+		list.add(withdrawalInt);
+		list.add(amountInt);
 
 		out.println("<h1>The account is value is" + accountDetailsInt);
 		out.println("The withdrawalID is value is" + withdrawalInt);
@@ -101,17 +107,7 @@ public class CaptureWithdrawalFormData extends HttpServlet {
 		} else {
 			logger.info("Record not available");
 			out.println("<h1>Record not available</h1>");
-
-			String insertTableSQL = "INSERT INTO WITHDRAWAL VALUES (?,?,?)";
-			PreparedStatement preparedStatement = conn.prepareStatement(insertTableSQL);
-			preparedStatement.setInt(1, withdrawalInt);
-			preparedStatement.setInt(2, amountInt);
-			preparedStatement.setInt(3, accountDetailsInt);
-
-			preparedStatement.executeUpdate();
-			logger.info(" ------ so new row saved in the database-----------");
-			out.println("<h1> ------ so new row saved in the database-----------</h1>");
-			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+			DataWrappers.dbPersistance(out, conn, Commons.WITHDRAWAL_INSERT, list);
 		}
 
 	}

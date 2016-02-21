@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Vector;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -37,6 +39,7 @@ public class CaptureDepositFormData extends HttpServlet {
 	Integer accountDetailsInt;
 	Integer depositInt;
 	Integer amountInt;
+	List list = new Vector();;
 
 	public CaptureDepositFormData() {
 		super();
@@ -72,6 +75,10 @@ public class CaptureDepositFormData extends HttpServlet {
 		depositInt = DataWrappers.getInts(request, response, "depositID");
 		amountInt = DataWrappers.getInts(request, response, "amount");
 
+		list.add(accountDetailsInt);
+		list.add(depositInt);
+		list.add(amountInt);
+
 		out.println("<h1>The account is value is" + accountDetailsInt);
 		out.println("The depositID is value is" + depositInt);
 		out.println("The amout is value is" + amountInt + "</h1>");
@@ -93,17 +100,7 @@ public class CaptureDepositFormData extends HttpServlet {
 		} else {
 			logger.info("Record not available");
 			out.println("<h1>Record not available</h1>");
-
-			String insertTableSQL = "INSERT INTO DEPOSIT VALUES (?,?,?)";
-			PreparedStatement preparedStatement = conn.prepareStatement(insertTableSQL);
-			preparedStatement.setInt(1, depositInt);
-			preparedStatement.setInt(2, amountInt);
-			preparedStatement.setInt(3, accountDetailsInt);
-
-			preparedStatement.executeUpdate();
-			logger.info(" ------ so new row saved in the database-----------");
-			out.println("<h1> ------ so new row saved in the database-----------</h1>");
-			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+			DataWrappers.dbPersistance(out, conn, Commons.DEPOSIT_INSERT, list);
 		}
 
 	}
