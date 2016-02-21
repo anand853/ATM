@@ -101,6 +101,7 @@ public class CaptureAccountDetailsFormData extends HttpServlet {
 
 		System.out.println(flag);
 		if (flag) {
+			DataWrappers.accountAvailable(out, conn, accountDetails, amountDetails);
 			logger.info("Record is available");
 			out.println("<h1>Record is available</h1>");
 			out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");

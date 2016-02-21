@@ -30,7 +30,7 @@ public class DataWrappers {
 	}
 
 	public static boolean isPersist(Connection conn, String sql, int depositInt) throws SQLException {
-		logger.info("----DataWrappers::isPersist()-----");
+		logger.info("----::isPersist()-----");
 		logger.debug("----dbPersistance::depositInt value-----" + depositInt);
 		PreparedStatement ps = conn.prepareStatement(sql);
 		logger.info("----dbPersistance::ps -----" + ps);
@@ -107,7 +107,7 @@ public class DataWrappers {
 				+ transactionDetaildID.getClass());
 
 		preparedStatement.executeUpdate();
-		logger.info(" ------ DataWrappers::amountPersistance()-----------");
+		logger.info(" ------ ::amountPersistance()-----------");
 		logger.info(" ------ so new row saved in the database*-----------");
 		out.println("<h1> ------ so new row saved in the database-----------</h1>");
 		out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
@@ -147,6 +147,75 @@ public class DataWrappers {
 		logger.info(" ------ so new row saved in the database*-----------");
 		out.println("<h1> ------ so new row saved in the database-----------</h1>");
 		out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+
+	}
+
+	public static void accountAvailable(PrintWriter out, Connection conn, List accountDetails, List amountDetails)
+			throws SQLException {
+
+		logger.info("----dbPersistance::accountAvailable()-----");
+		Integer account = (Integer) accountDetails.get(0);
+		Integer pin = (Integer) accountDetails.get(1);
+		Integer amount = (Integer) accountDetails.get(2);
+
+		String transactionType = (String) amountDetails.get(1);
+
+		Integer accountDetailsID = getPKOfTheAccountDetails(conn, accountDetails);
+		Integer TransactionID = getPKOfTheTransaction(conn, accountDetailsID);
+
+		PreparedStatement ps = conn.prepareStatement(Commons.TRANSACTION_INSERT);
+		ps.setInt(1, amount);
+		ps.setInt(2, accountDetailsID);
+
+		ps.executeUpdate();
+
+		PreparedStatement ps2 = conn.prepareStatement(Commons.AMOUNT_INSERT);
+		ps2.setInt(1, amount);
+		ps2.setString(2, transactionType);
+		ps2.setInt(3, accountDetailsID);
+		ps2.setInt(4, TransactionID);
+
+		ps2.executeUpdate();
+		
+		out.println("<h1> ------ so new row saved in the database-----------</h1>");
+		out.println("<a href='http://localhost:8080/ATM/'>Back to ATM</a>");
+
+	}
+
+	private static Integer getPKOfTheTransaction(Connection conn, Integer accountDetailsID) throws SQLException {
+
+		logger.info("----getPKOfTheTransaction::accountDetailsID-----" + accountDetailsID + "------------ "
+				+ accountDetailsID.getClass());
+
+		PreparedStatement ps = conn.prepareStatement(Commons.TRANSACTION_FIND_PK);
+		ps.setInt(1, accountDetailsID);
+		ResultSet rs = ps.executeQuery();
+		rs.next();
+
+		Integer transactionId = rs.getInt("TRANSACTION_ID");
+
+		logger.info("----getPKOfTheTransaction::transactionId()-----" + transactionId + "------------ "
+				+ transactionId.getClass());
+		return transactionId;
+
+	}
+
+	private static Integer getPKOfTheAccountDetails(Connection conn, List accountDetails) throws SQLException {
+
+		logger.info("----getPKOfTheTable()-----");
+		Integer account = (Integer) accountDetails.get(0);
+		Integer pin = (Integer) accountDetails.get(1);
+		logger.info("----getPKOfTheAccountDetails::account()-----" + account + "------------ " + account.getClass());
+		logger.info("----getPKOfTheAccountDetails::ipin value()-----" + pin + "-----------" + pin.getClass());
+
+		PreparedStatement preparedStatement = conn.prepareStatement(Commons.ACCOUNTDETAILS_FIND_PK);
+		preparedStatement.setInt(1, account);
+		preparedStatement.setInt(2, pin);
+		ResultSet rs = preparedStatement.executeQuery();
+		rs.next();
+
+		Integer accountDetailsID = rs.getInt("ACCOUNT_DETAILS_ID");
+		return accountDetailsID;
 
 	}
 }
